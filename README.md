@@ -2,12 +2,36 @@
 
 HeySpace 专治空格强迫症，空格党 High 起来！
 
-`[]~(￣▽￣)~*`
+
+## 概述
+
+> HeySpace 能帮你优化排版，提升阅读体验。
+
+- 核心功能：**中英文之间添加空格**
+- 去除连续两个以上的空行
+- 兼容 Markdown 格式
+  - 支持跳过代码块
+  - 不影响 Markdown 特殊符号的使用
+- 支持剪贴板输入输出，复制内容处理后可直接粘贴
+- 支持文件、目录输入输出，安全备份
+
+## TODO
+
+- [x] 剪贴板输入 / 输出
+- [x] 文件目录输入 / 输出
+- [ ] 服务监听模式
+- [ ] 纯文本非 Markdown 处理
+- [ ] PDF 模式空格、换行处理
+
 
 ## 使用方式
 
 ```shell script
-➜ heyspace help
+go get github.com/louisun/heyspace
+```
+
+```shell script
+$ heyspace help
 NAME:
    HeySpace - 在中英文之间添加空格
 
@@ -46,12 +70,6 @@ GLOBAL OPTIONS:
 > 效果请看 exapmples
 
 
-- [x] 剪贴板输入 / 输出
-- [ ] 文件目录输入 / 输出
-- [ ] 服务监听模式
-- [ ] 纯文本非 Markdown 处理
-- [ ] PDF 模式空格、换行处理
-
 
 ## 说明
 
@@ -76,4 +94,9 @@ osascript -e "display notification \"${strPrompt}\" with title \"排版成功，
 复制内容后执行快捷键，效果如下：
 
 ![](https://bucket-1255905387.cos.ap-shanghai.myqcloud.com/2019-12-12-19-31-49_r80.png)
- 
+
+
+## 待修复 bug
+
+- [ ] `(中文)` 在「非链接」情况下，依然需要加空格
+
