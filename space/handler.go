@@ -74,7 +74,7 @@ func (content *MarkdownHandler) handleLine(line string) string {
 			uLine := []rune(line)
 			if strings.HasPrefix(line, "> ") {
 				// 引用
-				return "> " + content.handleBlock(uLine[2:])
+				return "> " + content.handleBlock([]rune(strings.TrimLeft(string(uLine[2:]), " ")))
 			} else if match := content.HeaderRegex.FindStringSubmatch(line); match != nil {
 				// 标题
 				return match[1] + content.handleBlock([]rune(match[2]))

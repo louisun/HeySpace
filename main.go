@@ -1,12 +1,13 @@
 package main
 
 import (
-	"HeySpace/clipboard"
-	"HeySpace/config"
-	"HeySpace/file"
 	"log"
 	"os"
 	"time"
+
+	"github.com/louisun/heyspace/clipboard"
+	"github.com/louisun/heyspace/config"
+	"github.com/louisun/heyspace/file"
 
 	"github.com/urfave/cli/v2"
 )
@@ -25,8 +26,8 @@ func main() {
 		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:        "file",
-				Aliases:     []string{"f"},
+				Name:        "in",
+				Aliases:     []string{"i"},
 				Usage:       "输入文件路径",
 				DefaultText: "默认剪贴板输入",
 			},
@@ -49,6 +50,13 @@ func main() {
 				DefaultText: "关闭",
 			},
 			&cli.BoolFlag{
+				Name:        "quiet",
+				Aliases:     []string{"q"},
+				Usage:       "不输出具体文件日志",
+				Value:       false,
+				DefaultText: "关闭",
+			},
+			&cli.BoolFlag{
 				Name:        "markdown",
 				Aliases:     []string{"m"},
 				Usage:       "Markdown 模式",
@@ -67,8 +75,9 @@ func main() {
 			config.GlobalConfig.MarkdownMode = c.Bool("markdown")
 			config.GlobalConfig.ServerMode = c.Bool("server")
 			config.GlobalConfig.PDFMode = c.Bool("pdf") // TODO
+			config.GlobalConfig.QuietMode = c.Bool("quiet")
 
-			if c.String("file") == "" {
+			if c.String("in") == "" {
 				if !config.GlobalConfig.ServerMode {
 					if err := clipboard.HandleClipboardInput(); err != nil {
 						log.Fatal(err)
@@ -80,7 +89,7 @@ func main() {
 
 			} else {
 				// 若从文件输入，输出也会被设定为文件输出
-				if err := file.HandlePathInput(c.String("file"), c.String("out"), c.String("backup")); err != nil {
+				if err := file.HandlePathInput(c.String("in"), c.String("out"), c.String("backup")); err != nil {
 					log.Fatal(err)
 				}
 				log.Println("已成功处理所有文件，请查看")

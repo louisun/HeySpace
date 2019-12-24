@@ -1,8 +1,8 @@
 package clipboard
 
 import (
-	"HeySpace/config"
-	"HeySpace/space"
+	"github.com/louisun/heyspace/config"
+	"github.com/louisun/heyspace/space"
 
 	"github.com/atotto/clipboard"
 )

@@ -1,4 +1,4 @@
-module HeySpace
+module github.com/louisun/heyspace
 
 go 1.12
 

@@ -1,9 +1,6 @@
 package file
 
 import (
-	"HeySpace/config"
-	"HeySpace/space"
-	"HeySpace/utils"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +8,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/louisun/heyspace/config"
+	"github.com/louisun/heyspace/space"
+	"github.com/louisun/heyspace/utils"
 
 	"github.com/otiai10/copy"
 )
@@ -29,8 +30,10 @@ func HandlePathInput(inPath string, outPath string, backupPath string) error {
 			backupPath = fmt.Sprintf("%s%s", inPath, config.DEFAULT_BACKUP_SUFFIX)
 		}
 		// step1. 备份目录到 backupPath
-		log.Printf("目录已备份，备份路径 %s", backupPath)
-		copy.Copy(inPath, backupPath)
+		if backupPath != config.NO_BACKUP_FLAG {
+			log.Printf("目录已备份，备份路径 %s", backupPath)
+			copy.Copy(inPath, backupPath)
+		}
 
 		// step2. 遍历 inPath，逐个替换文件
 		log.Println("开始处理目录中的 Markdown 文件...")
@@ -132,7 +135,9 @@ func HandleFileInput(inPath string, outPath string, backupPath string) error {
 	defer of.Close()
 	of.WriteString(handler.HandleText())
 
-	log.Printf("【输入文件】: %s 【输出文件】: %s 【备份文件】: %s", inPath, outPath, backupPath)
+	if !config.GlobalConfig.QuietMode {
+		log.Printf("【输入文件】: %s 【输出文件】: %s 【备份文件】: %s", inPath, outPath, backupPath)
+	}
 	return nil
 }
 
