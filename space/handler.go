@@ -77,13 +77,13 @@ func (content *MarkdownHandler) handleLine(line string) string {
 				return "> " + content.handleBlock([]rune(strings.TrimLeft(string(uLine[2:]), " ")))
 			} else if match := content.HeaderRegex.FindStringSubmatch(line); match != nil {
 				// 标题
-				return match[1] + content.handleBlock([]rune(match[2]))
+				return match[1] + content.handleBlock([]rune(strings.TrimLeft(string(match[2]), " ")))
 			} else if match := content.OrderedListRegex.FindStringSubmatch(line); match != nil {
 				// 有序列表
-				return match[1] + content.handleBlock([]rune(match[2]))
+				return match[1] + content.handleBlock([]rune(strings.TrimLeft(string(match[2]), " ")))
 			} else if strings.HasPrefix(line, "- ") {
 				// 无序列表
-				return "- " + content.handleBlock(uLine[2:])
+				return "- " + content.handleBlock([]rune(strings.TrimLeft(string(uLine[2:]), " ")))
 			} else {
 				// 正常文本
 				return content.handleBlock([]rune(line))
