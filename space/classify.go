@@ -40,7 +40,7 @@ func isAlpha(c rune) bool {
 func isGeneralEnSymbol(c rune) bool {
 	enSymbols := []rune{
 		':', ';', '%', '!', '?', '°', '_',
-		'<', '=', '>', '"', '$', '&', '\'', ',', '.', '~',
+		'<', '=', '>', '"', '$', '&', '\'', ',', '.',
 		'/', '@', '\\', '^', '|',
 	}
 	for _, r := range enSymbols {
