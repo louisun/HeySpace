@@ -100,17 +100,23 @@ func (content *MarkdownHandler) handleLine(line string) string {
 }
 
 func (content *MarkdownHandler) handleBlock(line []rune) string {
-	var buffer bytes.Buffer
-	var outputString string
-	var length = len(line)
-	var italicCnt = 0
-	var boldCnt = 0
-	var pointCnt = 0
-	var preRune rune
-	for i, c := range line {
-		// 先写入字符
-		buffer.WriteRune(c)
-		if c == '*' {
+	var (
+		buffer       bytes.Buffer
+		outputString string
+		length       = len(line)
+
+		italicCnt   = 0  // 斜体 * 的计数
+		boldCnt     = 0  // 粗体 ** 的计数
+		backtickCnt = 0  // 反引号 ` 的计数
+		preRune     rune // 前一个字符
+	)
+
+	// buffer 写入方式：先写字符，后判断是否写入空格
+	for idx, currentRune := range line {
+		buffer.WriteRune(currentRune)
+
+		// 1: 计数
+		if currentRune == '*' {
 			if preRune == '*' {
 				boldCnt++
 				italicCnt--
@@ -118,36 +124,39 @@ func (content *MarkdownHandler) handleBlock(line []rune) string {
 				italicCnt++
 			}
 		}
-		if c == '`' {
-			pointCnt++
+
+		if currentRune == '`' {
+			backtickCnt++
 		}
-		if i < length-1 {
-			cn := line[i+1]
-			// 每次看看后面是什么字符，以判断是否需要加空格
-			//log.Println("当前字符：", string(c), "  下个一字符：", string(cn))
-			if isZh(c) && isGeneralEn(cn) {
+
+		// 2. 判断是否要加空格
+		if idx < length-1 {
+			nextRune := line[idx+1]
+
+			if isZh(currentRune) && isGeneralEn(nextRune) {
 				// 中文 + 泛用英文 -> 加空格
 				buffer.WriteString(" ")
-			} else if isGeneralEn(c) && isZh(cn) {
+			} else if isGeneralEn(currentRune) && isZh(nextRune) {
 				// 泛用英文 + 中文 -> 加空格
 				buffer.WriteString(" ")
-			} else if (isZh(c) && isEnLeftBracket(cn)) || (isEnRightBracket(c) && isZh(cn)) {
+			} else if (isZh(currentRune) && isEnLeftBracket(nextRune)) || (isEnRightBracket(currentRune) && isZh(nextRune)) {
 				// 由于链接、图片等格式，只用于这样的情况 )中文(
 				buffer.WriteString(" ")
 			}
+
 			// 有几种情况要特殊处理，核心是要分清在标点内部还是外部
 
-			if isZh(c) {
+			if isZh(currentRune) {
 				// 粗体中文**abc**
 				// 斜体中文*abc*
 				// 点中文`abc`
-				if cn == '*' {
-					if i < length-2 {
-						cn2 := line[i+2]
+				if nextRune == '*' {
+					if idx < length-2 {
+						cn2 := line[idx+2]
 						if cn2 == '*' {
 							// 粗体要看后面第三个字符是否是英文
-							if i < length-3 {
-								cn3 := line[i+3]
+							if idx < length-3 {
+								cn3 := line[idx+3]
 								// 粗体中文**a**
 								if boldCnt%2 == 0 && isGeneralEn(cn3) {
 									// 一个新粗体的开始
@@ -163,36 +172,52 @@ func (content *MarkdownHandler) handleBlock(line []rune) string {
 							}
 						}
 					}
-				} else if cn == '`' {
-					if i < length-2 {
-						cn2 := line[i+2]
+				} else if nextRune == '`' {
+					if idx < length-2 {
+						cn2 := line[idx+2]
 						// 小代码块要看后面第二个字符是否是英文
 						// 点中文`a`
-						if pointCnt%2 == 0 && isGeneralEn(cn2) {
+						if backtickCnt%2 == 0 && isGeneralEn(cn2) {
 							// 一个新代码块的开始
 							buffer.WriteString(" ")
 						}
 					}
 				}
 
-			} else if c == '*' && isZh(cn) {
-				// **abc**粗体中文
+			} else if currentRune == '*' && isZh(nextRune) {
 				// *abc*斜体中文
+
+				// 需要判断 * 之前的是否是英文，中文不需要加空格
 				if preRune == '*' {
 					if boldCnt%2 == 0 {
-						buffer.WriteString(" ")
+						// **abc**粗体中文
+						if idx-2 > 0 && line[idx-2] != '*' && !isZh(line[idx-2]) {
+							buffer.WriteString(" ")
+						}
+
+						// ***abc***粗体中文
+						if line[idx-2] == '*' && idx-3 > 0 && !isZh(line[idx-3]) {
+							buffer.WriteString(" ")
+						}
 					}
 				} else {
 					if italicCnt%2 == 0 {
+						// *abc*粗体中文
+						if idx-1 > 0 && !isZh(line[idx-1]) {
+							buffer.WriteString(" ")
+						}
+					}
+				}
+			} else if currentRune == '`' && isZh(nextRune) {
+				if backtickCnt%2 == 0 {
+					if idx-1 > 0 && !isZh(line[idx-1]) {
+						// `abc`点中文
 						buffer.WriteString(" ")
 					}
 				}
-			} else if c == '`' && isZh(cn) {
-				// `abc`点中文
-				buffer.WriteString(" ")
 			}
 
-			preRune = c
+			preRune = currentRune
 		}
 	}
 	outputString = buffer.String()
