@@ -1,6 +1,7 @@
-package space
+package main
 
 import (
+	"os"
 	"unicode"
 )
 
@@ -78,4 +79,44 @@ func isEnRightBracket(c rune) bool {
 		return true
 	}
 	return false
+}
+
+// 判断所给路径是否存在
+func existsPath(path string) bool {
+	_, err := os.Stat(path)
+	if err != nil {
+		if os.IsExist(err) {
+			return true
+		}
+		return false
+	}
+	return true
+}
+
+// 判断路径是否是目录
+func isDir(path string) bool {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return stat.IsDir()
+}
+
+// 判断路径是否是文件
+func isFile(path string) bool {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return !stat.IsDir()
+}
+
+// 判断是否存在该目录
+func existsDir(path string) bool {
+	return existsPath(path) && isDir(path)
+}
+
+// 判断是否存在该文件
+func existsFile(path string) bool {
+	return existsPath(path) && isFile(path)
 }
