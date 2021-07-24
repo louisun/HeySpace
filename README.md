@@ -14,13 +14,6 @@
 
 > 以上内容均只在 Mac OS 下测试过。
 
-### TODO
-
-- [x] 剪贴板输入 / 输出
-- [x] 文件目录输入 / 输出
-- [ ] 服务监听模式
-- [ ] 纯文本非 Markdown 处理
-- [ ] PDF 模式空格、换行处理
 
 ### 效果展示
 
@@ -33,8 +26,6 @@
 > 因为 Go 的 `net/http` 包提供了基础的路由函数组合与丰富的功能函数。所以在社区里流行一种用 Go 编写 API 不需要框架的观点，在我们看来，如果你的项目的路由在个位数、URI 固定且不通过 URI 来传递参数，那么确实使用官方库也就足够。但在复杂场景下，官方的 http 库还是有些力有不逮。
 
 同时不影响 Markdown 的符号的正常使用，包括：
-
-
 
 ~~~markdown
 # 标题
@@ -96,10 +87,7 @@ GLOBAL OPTIONS:
    --in value, -i value      输入文件路径 (default: 默认剪贴板输入)
    --out value, -o value     输出文件路径 (default: 默认剪贴板输出)
    --backup value, -b value  备份目录路径
-   --server, -s              服务器监听模式 (default: 关闭)
    --quiet, -q               不输出具体文件日志 (default: 关闭)
-   --markdown, -m            Markdown 模式 (default: 开启)
-   --pdf, -p                 PDF 模式 (default: 开启)
    --help, -h                show help (default: false)
    --version, -v             print the version (default: false)
 ```
@@ -110,8 +98,6 @@ GLOBAL OPTIONS:
 
 ```go
 ➜ heyspace
-
-➜ heyspace --markdown # 等同于上面
 ```
 
 -   步骤一：Copy 一段内容
@@ -214,6 +200,18 @@ osascript -e "display notification \"${strPrompt}\" with title \"排版成功，
 
 ![](https://bucket-1255905387.cos.ap-shanghai.myqcloud.com/2019-12-12-19-31-49_r80.png)
 
-## 待修复 bug
+在 Windows 下可以使用 AutoHotKey：
 
-- [ ] `(中文)` 在「非链接」情况下，依然需要加空格
+```ahk
+; control + alt + z
+
+^!z::heyspace()
+
+heyspace()
+{
+    ; replace with your bin path
+    RunWait, "C:\Users\Renzo\go\bin\heyspace.exe",,Hide
+    return
+}
+```
+
