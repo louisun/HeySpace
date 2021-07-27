@@ -32,8 +32,8 @@ var (
 )
 
 var (
-	codeFlag  bool
-	emptyFlag bool
+	codeFlag      bool
+	emptyLineFlag bool
 )
 
 type matchIdxPair struct {
@@ -64,20 +64,21 @@ func FormatMarkdown(text string) string {
 
 		// 位于代码块中
 		if codeFlag {
-			emptyFlag = false
+			emptyLineFlag = false
 			outputLines = append(outputLines, newLine)
 			continue
 		}
 
 		// 位于非代码块中，连续多个空行只保留一个
 		if strings.TrimSpace(newLine) == "" {
-			if emptyFlag {
+			if emptyLineFlag {
 				continue
 			}
 
-			emptyFlag = true
+			outputLines = append(outputLines, "")
+			emptyLineFlag = true
 		} else {
-			emptyFlag = false
+			emptyLineFlag = false
 			outputLines = append(outputLines, newLine)
 		}
 	}
