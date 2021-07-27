@@ -221,7 +221,7 @@ func doFormat(line []rune) string {
 			backQuoteCnt++
 		}
 
-		// 判断是否要加空格
+		// 判断当前字符后是否要加空格
 		if idx < length-1 {
 			nextRune := line[idx+1]
 
@@ -237,8 +237,11 @@ func doFormat(line []rune) string {
 				buffer.WriteString(" ")
 			}
 
-			// 有几种情况要特殊处理，核心是要分清在标点内部还是外部
+			// 星号相关：有几种情况要特殊处理，核心是要分清在标点内部还是外部
 
+			// --------------------------  情况一 -------------------------
+			// 			  当前是中文，后面是星号或反引号对开头
+			// -----------------------------------------------------------
 			// 粗体中文**abc**
 			// 斜体中文*abc*
 			// 点中文`abc`
@@ -250,10 +253,13 @@ func doFormat(line []rune) string {
 					doZhBackQuote(&buffer, line, idx, backQuoteCnt)
 				}
 
-				preRune = nextRune
+				preRune = currentRune
 				continue
 			}
 
+			// --------------------------  情况二 -------------------------
+			//                 当前是星号对结尾，后面是中文
+			// -----------------------------------------------------------
 			// *abc*中文
 			if currentRune == '*' && isZh(nextRune) {
 				// * 之前的字符是英文则需要加空格
@@ -265,15 +271,21 @@ func doFormat(line []rune) string {
 					doSingleStarZh(&buffer, line, idx, italicCnt)
 				}
 
-				preRune = nextRune
+				preRune = currentRune
 				continue
 			}
 
+			// --------------------------  情况三 -------------------------
+			//                   当前是反引号结尾，后面是中文
+			// -----------------------------------------------------------
+			//  `abc`中文
 			if currentRune == '`' && isZh(nextRune) {
 				doBackQuoteZh(&buffer, line, idx, backQuoteCnt)
 				preRune = currentRune
 				continue
 			}
+
+			preRune = currentRune
 		}
 	}
 
@@ -497,7 +509,7 @@ func setBackupFilePath(fstat os.FileInfo, inPath string, outPath string, backupP
 		if !existsDir(*backupPath) {
 			return errors.New("备份目录不存在")
 		}
-		*backupPath = fmt.Sprintf("%s%c%s%s%s", backupPath, os.PathSeparator,
+		*backupPath = fmt.Sprintf("%s%c%s%s%s", *backupPath, os.PathSeparator,
 			strings.TrimSuffix(fstat.Name(), MarkdownSuffix),
 			DefaultBackupSuffix, MarkdownSuffix)
 	}

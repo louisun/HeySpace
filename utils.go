@@ -10,6 +10,7 @@ func isZh(c rune) bool {
 	if c >= '\u4e00' && c <= '\u9fa5' {
 		return true
 	}
+
 	return false
 }
 
